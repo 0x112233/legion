@@ -30,4 +30,5 @@ pub mod prelude {
         subworld::SubWorld,
         world::{EntityStore, Universe, World},
     };
+    pub use crossbeam_channel;
 }
