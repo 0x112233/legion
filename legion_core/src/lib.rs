@@ -25,7 +25,7 @@ pub mod prelude {
         command::CommandBuffer,
         entity::Entity,
         event::Event,
-        filter::ChunksetFilterData,
+        filter::{ChunksetFilterData, Filter},
         filter::filter_fns::*,
         query::{IntoQuery, Query, Read, Tagged, TryRead, TryWrite, Write},
         subworld::SubWorld,
