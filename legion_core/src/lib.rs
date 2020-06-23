@@ -25,10 +25,11 @@ pub mod prelude {
         command::CommandBuffer,
         entity::Entity,
         event::Event,
+        filter::ChunksetFilterData,
         filter::filter_fns::*,
         query::{IntoQuery, Query, Read, Tagged, TryRead, TryWrite, Write},
         subworld::SubWorld,
-        world::{EntityStore, Universe, World},
+        world::{EntityStore, Universe, World, TagSet, TagLayout, IntoComponentSource},
     };
     pub use crossbeam_channel;
 }
