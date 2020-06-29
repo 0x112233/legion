@@ -1658,13 +1658,13 @@ impl ComponentStorage {
         ComponentIndex(index): ComponentIndex,
         drop: bool,
     ) -> Option<Entity> {
-        let removed = self.entities.swap_remove(index);
+        let removed = self.entities[index];
+        self.subscribers.send(Event::EntityRemoved(removed, self.id()));
+
+        self.entities.swap_remove(index);
         for (_, component) in unsafe { &mut *self.component_info.get() }.iter_mut() {
             component.writer().swap_remove(index, drop);
         }
-
-        self.subscribers
-            .send(Event::EntityRemoved(removed, self.id()));
         self.update_count_gauge();
 
         if self.entities.len() > index {
