@@ -415,6 +415,12 @@ impl Executor {
     #[cfg(feature = "par-schedule")]
     unsafe fn run_recursive(&self, i: usize, world: &World, resources: &Resources) {
         // safety: the caller ensures nothing else is accessing systems[i]
+        // {
+        //     let sys_mut = self.systems[i].get_mut();
+        //     println!("running system at index {} with name: {}", i, sys_mut.name());
+        //     sys_mut.run_unsafe(world, resources);
+        // }
+
         self.systems[i].get_mut().run_unsafe(world, resources);
 
         self.static_dependants[i].par_iter().for_each(|dep| {
