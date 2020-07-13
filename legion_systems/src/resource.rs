@@ -4,6 +4,7 @@ use legion_core::borrow::{AtomicRefCell, Ref, RefMut};
 use legion_core::query::{Read, ReadOnly, Write};
 use std::{
     any::TypeId,
+    borrow::Borrow,
     marker::PhantomData,
     ops::{Deref, DerefMut},
 };
@@ -80,9 +81,14 @@ pub trait ResourceSet: Send + Sync {
     }
 }
 
+pub trait MergeInternal {
+    fn merge_contents_from(&mut self, other: &Box<dyn Resource>) {}
+}
+impl<T> MergeInternal for T where T: 'static + Send + Sync {}
+
 /// Blanket trait for resource types.
-pub trait Resource: 'static + Downcast + Send + Sync {}
-impl<T> Resource for T where T: 'static + Send + Sync {}
+pub trait Resource: 'static + MergeInternal + Downcast + Send + Sync {}
+impl<T> Resource for T where T: 'static + MergeInternal + Send + Sync {}
 impl_downcast!(Resource);
 
 /// Wrapper type for safe, lifetime-garunteed immutable access to a resource of type `T'. This
@@ -327,7 +333,15 @@ impl Resources {
     pub fn merge(&mut self, mut other: Resources) {
         // Merge resources, retaining our local ones but moving in any non-existant ones
         for resource in other.storage.drain() {
-            self.storage.entry(resource.0).or_insert(resource.1);
+            if self.storage.contains_key(&resource.0) {
+                let other = resource.1.get_mut();
+                let stored_resource = self.storage.get_mut(&resource.0).unwrap();
+                let mut uncelled_stored_resource = stored_resource.get_mut();
+                uncelled_stored_resource.deref_mut().merge_contents_from(other.deref());
+            }
+            else {
+                self.storage.insert(resource.0, resource.1);
+            }
         }
     }
 }
